@@ -48,48 +48,49 @@
             const container = document.getElementById('checklist-container');
             container.innerHTML = ''; 
 
-            // Section-aware Sorting
-            const sortedItems = items.reduce((acc, item) => {
-                if (item.isDivider) {
-                    acc.current.sort((a, b) => a.isDone - b.isDone);
-                    acc.result.push(...acc.current, item);
-                    acc.current = [];
-                } else {
-                    acc.current.push(item);
-                }
-                return acc;
-            }, { result: [], current: [] });
+            const partitioned = [];
+            let currentSection = null;
 
-            sortedItems.current.sort((a, b) => a.isDone - b.isDone);
-            const finalItems = [...sortedItems.result, ...sortedItems.current];
-            
-            const htmlString = finalItems.map(item => {
+            items.forEach(item => {
                 if (item.isDivider) {
-                    return `
-                        <div class="pt-4 pb-1 border-b border-gray-700">
-                            <h2 class="text-lg font-bold text-gray-400">${item.name}</h2>
-                        </div>
-                    `;
+                    currentSection = { divider: item, elements: [] };
+                    partitioned.push(currentSection);
+                } else if (currentSection) {
+                    currentSection.elements.push(item);
                 }
-                return `
-                    <div onclick="toggleItem(${item.id})" class="flex justify-between items-center bg-gray-750 p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] cursor-pointer">
+            });
+
+            const htmlString = partitioned.map(section => {
+                const dividerHtml = `
+                    <div class="pt-4 pb-1 border-b border-gray-700">
+                        <h2 class="text-lg font-bold text-gray-400">${section.divider.name}</h2>
+                    </div>
+                `;
+
+                // Sort intra-section items so checked elements sink to the bottom
+                const sortedItems = [...section.elements].sort((a, b) => a.isDone - b.isDone);
+
+                const itemsHtml = sortedItems.map(item => `
+                    <div onclick="toggleItem(${item.id})" class="flex justify-between items-center bg-[#2d3748] p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] cursor-pointer selection:bg-transparent">
                         <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
                             ${item.name}
                         </span>
                         <input type="checkbox" ${item.isDone ? 'checked' : ''} class="w-6 h-6 rounded-md accent-blue-500 pointer-events-none">
                     </div>
-                `;
+                `).join('');
+
+                return dividerHtml + itemsHtml;
             }).join('');
             
             container.innerHTML = htmlString;
         }
 
         window.toggleItem = function(id) {
-            console.log("媽媽點擊了物品 ID:", id);
-
             const targetItem = items.find(item => item.id === id);
-            targetItem.isDone = !targetItem.isDone;
-            renderList();
+            if (targetItem) {
+                targetItem.isDone = !targetItem.isDone;
+                renderList();
+            }
         }
 
         renderList();
