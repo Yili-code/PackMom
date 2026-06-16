@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>媽媽的旅遊打包檢查器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 為了媽媽的手機體驗，優化點擊時的藍色高亮陰影 */
+        -webkit-tap-highlight-color: transparent;
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex justify-center items-start p-4 antialiased">
+
+    <main class="w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden mt-4">
+        
+        <header class="p-6 bg-gradient-to-r from-black to-blue-400 shadow-md">
+            <h1 class="text-2xl font-bold tracking-wide text-white">基礎模板</h1>
+            <p class="text-xs font-bold text-white mt-1 opacity-90">勾選後的物品會自動沉到底部</p>
+        </header>
+
+        <div id="checklist-container" class="p-4 space-y-3 max-h-[70vh] overflow-y-auto"></div>
+    </main>
+
+    <script>
+        let items = [
+            { id: "d1", name: "醫療與身體防護", isDivider: true },
+            { id: 1, name: "脖圍（防曬）", isDone: false },
+            { id: 2, name: "電解質粉", isDone: false },
+            { id: 3, name: "暈車藥", isDone: false },
+            { id: 4, name: "過敏咳藥", isDone: false },
+            { id: 5, name: "氧木斯", isDone: false },
+            { id: 6, name: "蘆薈（曬傷用）", isDone: false },
+
+            { id: "d2", name: "個人護理", isDivider: true },
+            { id: 7, name: "乳液", isDone: false },
+            { id: 8, name: "修護霜／精華液體", isDone: false },
+            { id: 9, name: "卸妝面紙", isDone: false },
+
+            { id: "d3", name: "生活雜項", isDivider: true },
+            { id: 10, name: "內衣袋 2 個、大洗衣袋 2 個", isDone: false },
+            { id: 11, name: "拖鞋", isDone: false },
+            { id: 12, name: "行李（轉機領取）", isDone: false },
+            { id: 13, name: "「快速」VPN 帳號截圖", isDone: false }
+        ];
+
+        function renderList() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = ''; 
+
+            // Section-aware Sorting
+            const sortedItems = [];
+            let currentGroup = [];
+
+            items.forEach(item => {
+                if (item.isDivider) {
+                    if (currentGroup.length > 0) {
+                        currentGroup.sort((a, b) => (a.isDone === b.isDone) ? 0 : (a.isDone ? 1 : -1));
+                        sortedItems.push(...currentGroup);
+                        currentGroup = [];
+                    }
+                    sortedItems.push(item);
+                } else {
+                    currentGroup.push(item);
+                }
+            });
+
+            if (currentGroup.length > 0) {
+                currentGroup.sort((a, b) => a.isDone === b.isDone ? 0 : (a.isDone ? 1 : -1));
+                sortedItems.push(...currentGroup);
+            }
+            
+            sortedItems.forEach(item => {
+                if (item.isDivider) {
+                    const dividerHtml = `
+                        <div class="pt-4 pb-1 border-b border-gray-700">
+                            <h2 class="text-lg font-bold text-gray-400">${item.name}</h2>
+                        </div>
+                    `;
+                    container.innerHTML += dividerHtml;
+                } else {
+                    const itemHtml = `
+                        <div onclick="toggleItem(${item.id})" class="flex justify-between items-center bg-gray-750 p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] cursor-pointer">
+                            <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
+                                ${item.name}
+                            </span>
+                            
+                            <input type="checkbox" ${item.isDone ? 'checked' : ''} class="w-6 h-6 rounded-md accent-blue-500 pointer-events-none">
+                        </div>
+                    `;
+                    container.innerHTML += itemHtml;
+                }
+            });
+        }
+
+        // ==========================================
+        // 【3. 核心修練：狀態變更觸發器】
+        // ==========================================
+        window.toggleItem = function(id) {
+            console.log("媽媽點擊了物品 ID:", id);
+            
+            // TODO: 1. 請用 JavaScript 找到 items 陣列中，那個 id 符合的 Object。
+            // TODO: 2. 把那個 Object 的 isDone 狀態反轉 (!isDone)。
+            // TODO: 3. 重新呼叫 renderList()，讓資料驅動畫面更新！
+        }
+
+        // 第一次打開網頁時，初始化渲染
+        renderList();
+    </script>
+</body>
+</html>
