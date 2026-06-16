@@ -49,28 +49,21 @@
             container.innerHTML = ''; 
 
             // Section-aware Sorting
-            const sortedItems = [];
-            let currentGroup = [];
-
-            items.forEach(item => {
+            const sortedItems = items.reduce((acc, item) => {
                 if (item.isDivider) {
-                    if (currentGroup.length > 0) {
-                        currentGroup.sort((a, b) => (a.isDone === b.isDone) ? 0 : (a.isDone ? 1 : -1));
-                        sortedItems.push(...currentGroup);
-                        currentGroup = [];
-                    }
-                    sortedItems.push(item);
+                    acc.current.sort((a, b) => a.isDone - b.isDone);
+                    acc.result.push(...acc.current, item);
+                    acc.current = [];
                 } else {
-                    currentGroup.push(item);
+                    acc.current.push(item);
                 }
-            });
+                return acc;
+            }, { result: [], current: [] });
 
-            if (currentGroup.length > 0) {
-                currentGroup.sort((a, b) => a.isDone === b.isDone ? 0 : (a.isDone ? 1 : -1));
-                sortedItems.push(...currentGroup);
-            }
+            sortedItems.current.sort((a, b) => a.isDone - b.isDone);
+            const finalItems = [...sortedItems.result, ...sortedItems.current];
             
-            sortedItems.forEach(item => {
+            finalItems.forEach(item => {
                 if (item.isDivider) {
                     const dividerHtml = `
                         <div class="pt-4 pb-1 border-b border-gray-700">
