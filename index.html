@@ -84,18 +84,14 @@
             container.innerHTML = htmlString;
         }
 
-        // ==========================================
-        // 【3. 核心修練：狀態變更觸發器】
-        // ==========================================
         window.toggleItem = function(id) {
             console.log("媽媽點擊了物品 ID:", id);
-            
-            // TODO: 1. 請用 JavaScript 找到 items 陣列中，那個 id 符合的 Object。
-            // TODO: 2. 把那個 Object 的 isDone 狀態反轉 (!isDone)。
-            // TODO: 3. 重新呼叫 renderList()，讓資料驅動畫面更新！
+
+            const targetItem = items.find(item => item.id === id);
+            targetItem.isDone = !targetItem.isDone;
+            renderList();
         }
 
-        // 第一次打開網頁時，初始化渲染
         renderList();
     </script>
 </body>
