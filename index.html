@@ -42,7 +42,7 @@
             { id: 11, name: "拖鞋", isDone: false },
             { id: 12, name: "行李（轉機領取）", isDone: false },
             { id: 13, name: "「快速」VPN 帳號截圖", isDone: false }
-        ];
+        ]; 
 
         function renderList() {
             const container = document.getElementById('checklist-container');
@@ -60,18 +60,31 @@
                 }
             });
 
+            // inner sorting
+            partitioned.forEach(section => {
+                section.elements.sort((a, b) => a.isDone - b.isDone);
+            });
+
+            // top-level sorting
+            partitioned.sort((a, b) => {
+                const aAllDone = a.elements.every(item => item.isDone);
+                const bAllDone = b.elements.every(item => item.isDone);
+                
+                if (aAllDone === bAllDone) return 0;
+                return aAllDone ? 1 : -1;
+            });
+
             const htmlString = partitioned.map(section => {
+                const isAllDone = section.elements.every(item => item.isDone);
+                
                 const dividerHtml = `
-                    <div class="pt-4 pb-1 border-b border-gray-700">
-                        <h2 class="text-lg font-bold text-gray-400">${section.divider.name}</h2>
+                    <div class="pt-4 pb-1 border-b border-gray-700 transition-all ${isAllDone ? 'opacity-40' : ''}">
+                        <h2 class="text-lg font-bold ${isAllDone ? 'text-gray-500' : 'text-gray-400'}">${section.divider.name}</h2>
                     </div>
                 `;
 
-                // Sort intra-section items so checked elements sink to the bottom
-                const sortedItems = [...section.elements].sort((a, b) => a.isDone - b.isDone);
-
-                const itemsHtml = sortedItems.map(item => `
-                    <div onclick="toggleItem(${item.id})" class="flex justify-between items-center bg-[#2d3748] p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] cursor-pointer selection:bg-transparent">
+                const itemsHtml = section.elements.map(item => `
+                    <div onclick="toggleItem(${item.id})" class="flex justify-between items-center bg-[#2d3748] p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] cursor-pointer selection:bg-transparent mt-3">
                         <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
                             ${item.name}
                         </span>
@@ -81,7 +94,7 @@
 
                 return dividerHtml + itemsHtml;
             }).join('');
-            
+                
             container.innerHTML = htmlString;
         }
 
