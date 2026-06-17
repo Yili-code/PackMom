@@ -96,7 +96,7 @@
                         onchange="switchTemplate(this.value)"
                         class="template-select rounded-lg bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-3 py-2 border border-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
                     >
-                        </select>
+                    </select>
                     
                     <button
                         type="button"
@@ -133,9 +133,7 @@
     </main>
 
     <script>
-        let currentTemplateId = "basic";
-
-        let templates = {
+        const defaultTemplates = {
             "basic": {
                 name: "基礎模板",
                 items: [
@@ -161,10 +159,20 @@
             }
         };
 
+        const savedTemplates = localStorage.getItem('mom_travel_templates');
+        const savedTemplateId = localStorage.getItem('mom_current_template_id');
+
+        let templates = savedTemplates ? JSON.parse(savedTemplates) : defaultTemplates;
+        let currentTemplateId = savedTemplateId && templates[savedTemplateId] ? savedTemplateId : "basic";
         let isEditing = false;
 
         function getCurrentItems() {
             return templates[currentTemplateId].items;
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('mom_travel_templates', JSON.stringify(templates));
+            localStorage.setItem('mom_current_template_id', currentTemplateId);
         }
         
         function renderTemplateSelector() {
@@ -251,11 +259,14 @@
             }).join('');
 
             container.innerHTML = htmlString;
+            
+            saveToLocalStorage();
         }
 
         window.switchTemplate = function(templateId) {
             if (templates[templateId]) {
                 currentTemplateId = templateId;
+                renderTemplateSelector();
                 renderList();
             }
         };
@@ -276,7 +287,7 @@
 
         window.deleteItem = function(id) {
             const filteredItems = getCurrentItems().filter(item => item.id !== id);
-            templates[currentTemplateId].items = newItems(filteredItems);
+            templates[currentTemplateId].items = filteredItems;
             renderList();
         };
 
@@ -332,7 +343,6 @@
             if (!newName || newName.trim() === "") return;
 
             const newTemplateId = "tmpl_" + Date.now();
-
             const clonedItems = structuredClone(currentTemplate.items);
             
             clonedItems.forEach(item => {
