@@ -7,7 +7,55 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* 為了媽媽的手機體驗，優化點擊時的藍色高亮陰影 */
-        -webkit-tap-highlight-color: transparent;
+        html, body {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .edit-toggle-btn {
+            min-width: 8rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .edit-toggle-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .item-action-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            border-radius: 9999px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .add-item-btn {
+            margin-top: 0.6rem;
+            width: 100%;
+            border: 1px dashed #60a5fa;
+            color: #bfdbfe;
+            background: rgba(37, 99, 235, 0.08);
+            border-radius: 0.9rem;
+            padding: 0.65rem 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .add-item-btn:hover {
+            background: rgba(37, 99, 235, 0.16);
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex justify-center items-start p-4 antialiased">
@@ -15,8 +63,19 @@
     <main class="w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl border border-gray-700 overflow-hidden mt-4">
         
         <header class="p-6 bg-gradient-to-r from-black to-blue-400 shadow-md">
-            <h1 class="text-2xl font-bold tracking-wide text-white">基礎模板</h1>
-            <p class="text-xs font-bold text-white mt-1 opacity-90">勾選後的物品會自動沉到底部</p>
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide text-white">基礎模板</h1>
+                    <p class="text-xs font-bold text-white mt-1 opacity-90">勾選後的物品會自動沉到底部</p>
+                </div>
+                <button
+                    type="button"
+                    onclick="toggleEditMode()"
+                    class="edit-toggle-btn rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-4 py-2 border border-white/15"
+                >
+                    切換編輯模式
+                </button>
+            </div>
         </header>
 
         <div id="checklist-container" class="p-4 space-y-3 max-h-[70vh] overflow-y-auto"></div>
@@ -25,28 +84,30 @@
     <script>
         let items = [
             { id: "d1", name: "醫療與身體防護", isDivider: true },
-            { id: 1, name: "脖圍（防曬）", isDone: false },
-            { id: 2, name: "電解質粉", isDone: false },
-            { id: 3, name: "暈車藥", isDone: false },
-            { id: 4, name: "過敏咳藥", isDone: false },
-            { id: 5, name: "氧木斯", isDone: false },
-            { id: 6, name: "蘆薈（曬傷用）", isDone: false },
+            { id: "1", name: "脖圍（防曬）", isDone: false },
+            { id: "2", name: "電解質粉", isDone: false },
+            { id: "3", name: "暈車藥", isDone: false },
+            { id: "4", name: "過敏咳藥", isDone: false },
+            { id: "5", name: "氧木斯", isDone: false },
+            { id: "6", name: "蘆薈（曬傷用）", isDone: false },
 
             { id: "d2", name: "個人護理", isDivider: true },
-            { id: 7, name: "乳液", isDone: false },
-            { id: 8, name: "修護霜／精華液體", isDone: false },
-            { id: 9, name: "卸妝面紙", isDone: false },
+            { id: "7", name: "乳液", isDone: false },
+            { id: "8", name: "修護霜／精華液體", isDone: false },
+            { id: "9", name: "卸妝面紙", isDone: false },
 
             { id: "d3", name: "生活雜項", isDivider: true },
-            { id: 10, name: "內衣袋 2 個、大洗衣袋 2 個", isDone: false },
-            { id: 11, name: "拖鞋", isDone: false },
-            { id: 12, name: "行李（轉機領取）", isDone: false },
-            { id: 13, name: "「快速」VPN 帳號截圖", isDone: false }
-        ]; 
+            { id: "10", name: "內衣袋 2 個、大洗衣袋 2 個", isDone: false },
+            { id: "11", name: "拖鞋", isDone: false },
+            { id: "12", name: "行李（轉機領取）", isDone: false },
+            { id: "13", name: "「快速」VPN 帳號截圖", isDone: false }
+        ];
+
+        let isEditing = false;
 
         function renderList() {
             const container = document.getElementById('checklist-container');
-            container.innerHTML = ''; 
+            container.innerHTML = '';
 
             const partitioned = [];
             let currentSection = null;
@@ -69,42 +130,103 @@
             partitioned.sort((a, b) => {
                 const aAllDone = a.elements.every(item => item.isDone);
                 const bAllDone = b.elements.every(item => item.isDone);
-                
+
                 if (aAllDone === bAllDone) return 0;
                 return aAllDone ? 1 : -1;
             });
 
             const htmlString = partitioned.map(section => {
                 const isAllDone = section.elements.every(item => item.isDone);
-                
+
                 const dividerHtml = `
                     <div class="pt-4 pb-1 border-b border-gray-700 transition-all ${isAllDone ? 'opacity-40' : ''}">
-                        <h2 class="text-lg font-bold ${isAllDone ? 'text-gray-500' : 'text-gray-400'}">${section.divider.name}</h2>
+                        <div class="flex items-center justify-between gap-3">
+                            <h2 class="text-lg font-bold ${isAllDone ? 'text-gray-500' : 'text-gray-400'}">${section.divider.name}</h2>
+                        </div>
+                        ${isEditing ? `<button type="button" onclick="addItem('${section.divider.id}')" class="add-item-btn">＋新增項目</button>` : ''}
                     </div>
                 `;
 
                 const itemsHtml = section.elements.map(item => `
-                    <div onclick="toggleItem(${item.id})" class="flex justify-between items-center bg-[#2d3748] p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] cursor-pointer selection:bg-transparent mt-3">
+                    <div class="flex justify-between items-center bg-[#2d3748] p-4 rounded-xl border border-gray-700/50 hover:bg-gray-700 transition active:scale-[0.98] ${isEditing ? 'cursor-default' : 'cursor-pointer'} selection:bg-transparent mt-3"
+                        ${isEditing ? '' : `onclick="toggleItem('${item.id}')"`}>
                         <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
                             ${item.name}
                         </span>
-                        <input type="checkbox" ${item.isDone ? 'checked' : ''} class="w-6 h-6 rounded-md accent-blue-500 pointer-events-none">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" ${item.isDone ? 'checked' : ''} class="w-6 h-6 rounded-md accent-blue-500 pointer-events-none ${isEditing ? 'hidden' : ''}">
+                            <div class="item-action-group ${isEditing ? 'flex' : 'hidden'}">
+                                <button
+                                    type="button"
+                                    onclick="event.stopPropagation(); deleteItem('${item.id}')"
+                                    class="action-btn bg-red-500 hover:bg-red-600 text-white"
+                                >
+                                    刪除
+                                </button>
+                                <button
+                                    type="button"
+                                    onclick="event.stopPropagation(); editItem('${item.id}')"
+                                    class="action-btn bg-blue-500 hover:bg-blue-600 text-white"
+                                >
+                                    修改名稱
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `).join('');
 
                 return dividerHtml + itemsHtml;
             }).join('');
-                
+
             container.innerHTML = htmlString;
         }
 
         window.toggleItem = function(id) {
-            const targetItem = items.find(item => item.id === id);
-            if (targetItem) {
+            const targetItem = items.find(item => String(item.id) === String(id));
+            if (targetItem && !targetItem.isDivider) {
                 targetItem.isDone = !targetItem.isDone;
                 renderList();
             }
-        }
+        };
+
+        window.toggleEditMode = function() {
+            isEditing = !isEditing;
+            renderList();
+        };
+
+        window.deleteItem = function(id) {
+            items = items.fliter(item => item.id !== id);
+            renderList;
+        };
+
+        window.editItem = function(id) {
+            const targetItem = items.find(item => item.id === id);
+            if (!targetItem) return;
+
+            const newName = window.prompt("請輸入新的物品名稱: ", targetItem.name);
+            if (newName && newName.trim() !== "") {
+                targetItem.name = newName.trim();
+                renderList();
+            }
+        };
+
+        window.addItem = function(sectionId) {
+            const itemName = window.prompt("請輸入欲新增的物品名稱：");
+            if (!itemName || itemName.trim() === "") return;
+
+            const newItem = {
+                id: String(Date.new()),
+                name: itemName.trim(),
+                isDone: false
+            };
+
+            const dividerIndex = items.findIndex(item => item.id === sectionId);
+
+            if (dividerIndex !== -1) {
+                items.splice(dividerIndex + 1, 0, newItem);
+                renderList();
+            }
+        };
 
         renderList();
     </script>
