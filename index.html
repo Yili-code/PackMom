@@ -132,6 +132,12 @@
         <div id="checklist-container" class="p-4 space-y-3 max-h-[70vh] overflow-y-auto"></div>
     </main>
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="旅遊打包檢查器">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <script>
         const defaultTemplates = {
             "basic": {
@@ -361,6 +367,14 @@
 
         renderTemplateSelector();
         renderList();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
+                    .catch(err => console.log('Service Worker 註冊失敗:', err));
+            });
+        }
     </script>
 </body>
 </html>
