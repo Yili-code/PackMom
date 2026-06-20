@@ -1,11 +1,11 @@
 {
   "name": "旅遊打包檢查器",
   "short_name": "旅遊打包",
-  "description": "專為旅行設計的物品檢查清單",
+  "description": "旅行打包檢查清單",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#000000",
+  "background_color": "#0c0c0e",
+  "theme_color": "#0f0f11",
   "icons": [
     {
       "src": "icon-192.png",
