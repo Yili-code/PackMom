@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>旅遊打包檢查器</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        html, body {
+        html,
+        body {
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -83,45 +85,32 @@
         }
     </style>
 </head>
+
 <body class="bg-[#0c0c0e] text-gray-100 min-h-screen flex justify-center items-start p-4 antialiased">
 
     <main class="w-full max-w-md bg-[#0f0f11] rounded-3xl shadow-2xl border border-[#1c1c1f] overflow-hidden mt-4">
-        
+
         <header class="p-6 bg-gradient-to-r from-black to-blue-400 shadow-md">
             <div class="flex items-center justify-between gap-4">
 
                 <div class="flex items-center gap-3 flex-1">
-                    <select
-                        id="template-selector"
-                        onchange="switchTemplate(this.value)"
-                        class="template-select rounded-lg bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-3 py-2 border border-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20"
-                    >
+                    <select id="template-selector" onchange="switchTemplate(this.value)"
+                        class="template-select rounded-lg bg-white/15 hover:bg-white/25 text-white text-sm font-semibold px-3 py-2 border border-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20">
                     </select>
-                    
-                    <button
-                        type="button"
-                        onclick="renameCurrentTemplate()"
-                        title="改名當前模板"
-                        class="action-small-btn rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3 py-2 border border-white/15 transition-all"
-                    >
+
+                    <button type="button" onclick="renameCurrentTemplate()" title="改名當前模板"
+                        class="action-small-btn rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3 py-2 border border-white/15 transition-all">
                         改名
                     </button>
 
-                    <button
-                        type="button"
-                        onclick="duplicateCurrentTemplate()"
-                        title="複製並新增清單"
-                        class="action-small-btn rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3 py-2 border border-white/15 transition-all"
-                    >
+                    <button type="button" onclick="duplicateCurrentTemplate()" title="複製並新增清單"
+                        class="action-small-btn rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold px-3 py-2 border border-white/15 transition-all">
                         複製
                     </button>
                 </div>
 
-                <button
-                    type="button"
-                    onclick="toggleEditMode()"
-                    class="edit-toggle-btn rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-4 py-2 border border-white/15 transition-all"
-                >
+                <button type="button" onclick="toggleEditMode()"
+                    class="edit-toggle-btn rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-4 py-2 border border-white/15 transition-all">
                     切換編輯模式
                 </button>
             </div>
@@ -180,7 +169,7 @@
             localStorage.setItem('mom_travel_templates', JSON.stringify(templates));
             localStorage.setItem('mom_current_template_id', currentTemplateId);
         }
-        
+
         function renderTemplateSelector() {
             const selector = document.getElementById('template-selector');
             selector.innerHTML = Object.keys(templates).map(id => `
@@ -240,7 +229,13 @@
                             ${item.name}
                         </span>
                         <div class="flex items-center gap-2">
-                            <input type="checkbox" ${item.isDone ? 'checked' : ''} class="w-6 h-6 rounded-md accent-blue-500 pointer-events-none ${isEditing ? 'hidden' : ''}">
+                            <div class="w-6 h-6 rounded-md flex items-center justify-center transition-all border-2 ${item.isDone ? 'bg-blue-500 border-blue-500 text-white' : 'border-white/50 hover:border-white/70'} ${isEditing ? 'hidden' : ''}">
+                                ${item.isDone ? `
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                ` : ''}
+                            </div>
                             <div class="item-action-group ${isEditing ? 'flex' : 'hidden'}">
                                 <button
                                     type="button"
@@ -265,11 +260,11 @@
             }).join('');
 
             container.innerHTML = htmlString;
-            
+
             saveToLocalStorage();
         }
 
-        window.switchTemplate = function(templateId) {
+        window.switchTemplate = function (templateId) {
             if (templates[templateId]) {
                 currentTemplateId = templateId;
                 renderTemplateSelector();
@@ -277,7 +272,7 @@
             }
         };
 
-        window.toggleItem = function(id) {
+        window.toggleItem = function (id) {
             const currentItems = getCurrentItems();
             const targetItem = currentItems.find(item => String(item.id) === String(id));
             if (targetItem && !targetItem.isDivider) {
@@ -286,18 +281,18 @@
             }
         };
 
-        window.toggleEditMode = function() {
+        window.toggleEditMode = function () {
             isEditing = !isEditing;
             renderList();
         };
 
-        window.deleteItem = function(id) {
+        window.deleteItem = function (id) {
             const filteredItems = getCurrentItems().filter(item => item.id !== id);
             templates[currentTemplateId].items = filteredItems;
             renderList();
         };
 
-        window.editItem = function(id) {
+        window.editItem = function (id) {
             const currentItems = getCurrentItems();
             const targetItem = currentItems.find(item => item.id === id);
             if (!targetItem) return;
@@ -309,7 +304,7 @@
             }
         };
 
-        window.addItem = function(sectionId) {
+        window.addItem = function (sectionId) {
             const itemName = window.prompt("請輸入欲新增的物品名稱：");
             if (!itemName || itemName.trim() === "") return;
 
@@ -327,21 +322,21 @@
                 renderList();
             }
         };
-        
-        window.renameCurrentTemplate = function() {
+
+        window.renameCurrentTemplate = function () {
             const currentTemplate = templates[currentTemplateId];
             if (!currentTemplate) return;
 
             const newName = window.prompt("請輸入新的模板名稱：", currentTemplate.name);
-            
+
             if (newName && newName.trim() !== "") {
                 currentTemplate.name = newName.trim();
-                renderTemplateSelector(); 
-                renderList();             
+                renderTemplateSelector();
+                renderList();
             }
         };
 
-        window.duplicateCurrentTemplate = function() {
+        window.duplicateCurrentTemplate = function () {
             const currentTemplate = templates[currentTemplateId];
             if (!currentTemplate) return;
 
@@ -350,9 +345,9 @@
 
             const newTemplateId = "tmpl_" + Date.now();
             const clonedItems = structuredClone(currentTemplate.items);
-            
+
             clonedItems.forEach(item => {
-                if (!item.isDivider) item.isDone = false; 
+                if (!item.isDivider) item.isDone = false;
             });
 
             templates[newTemplateId] = {
@@ -377,4 +372,5 @@
         }
     </script>
 </body>
+
 </html>
