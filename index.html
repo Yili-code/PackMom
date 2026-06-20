@@ -211,25 +211,18 @@
             });
 
             const htmlString = partitioned.map(section => {
-                const isAllDone = section.elements.every(item => item.isDone);
-
-                const dividerHtml = `
-                    <div class="pt-4 pb-1 border-b border-[#1c1c1f] transition-all ${isAllDone ? 'opacity-40' : ''}">
-                        <div class="flex items-center justify-between gap-3">
-                            <h2 class="text-lg font-bold ${isAllDone ? 'text-gray-500' : 'text-gray-400'}">${section.divider.name}</h2>
-                        </div>
-                        ${isEditing ? `<button type="button" onclick="addItem('${section.divider.id}')" class="add-item-btn">＋新增項目</button>` : ''}
-                    </div>
-                `;
+                const totalCount = section.elements.length;
+                const doneCount = section.elements.filter(item => item.isDone).length;
+                const isAllDone = totalCount > 0 && doneCount === totalCount;
 
                 const itemsHtml = section.elements.map(item => `
-                    <div class="flex justify-between items-center bg-[#16161a] p-4 rounded-xl border border-white/5 hover:bg-[#1f1f24] transition active:scale-[0.98] ${isEditing ? 'cursor-default' : 'cursor-pointer'} selection:bg-transparent mt-3"
+                    <div class="flex justify-between items-center bg-[#18181c] p-4 rounded-xl border border-white/5 hover:bg-[#202025] transition active:scale-[0.98] ${isEditing ? 'cursor-default' : 'cursor-pointer'} selection:bg-transparent"
                         ${isEditing ? '' : `onclick="toggleItem('${item.id}')"`}>
                         <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
                             ${item.name}
                         </span>
                         <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-md flex items-center justify-center transition-all border-2 ${item.isDone ? 'bg-blue-500 border-blue-500 text-white' : 'border-white/50 hover:border-white/70'} ${isEditing ? 'hidden' : ''}">
+                            <div class="w-6 h-6 rounded-md flex items-center justify-center transition-all border-2 ${item.isDone ? 'bg-blue-500 border-blue-500 text-white' : 'border-white/70 hover:border-white'} ${isEditing ? 'hidden' : ''}">
                                 ${item.isDone ? `
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -256,7 +249,32 @@
                     </div>
                 `).join('');
 
-                return dividerHtml + itemsHtml;
+                return `
+                    <div class="bg-[#121215] border border-white/5 rounded-2xl p-4 mb-4 transition-all ${isAllDone ? 'opacity-50' : ''}">
+                        <!-- 分類標頭 -->
+                        <div class="flex items-center justify-between pb-2 border-b border-white/5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                <h2 class="text-sm font-bold text-gray-200 tracking-wide">${section.divider.name}</h2>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 tabular-nums">
+                                    ${doneCount} / ${totalCount}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- 項目清單 -->
+                        <div class="space-y-3 mt-3">
+                            ${itemsHtml}
+                        </div>
+                        
+                        <!-- 新增按鈕 (編輯模式下顯示在板塊底部) -->
+                        ${isEditing ? `
+                            <button type="button" onclick="addItem('${section.divider.id}')" class="add-item-btn mt-3">＋新增項目</button>
+                        ` : ''}
+                    </div>
+                `;
             }).join('');
 
             container.innerHTML = htmlString;
