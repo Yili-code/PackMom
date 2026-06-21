@@ -347,9 +347,22 @@
                                 <h2 class="text-sm font-bold text-gray-200 tracking-wide">${section.divider.name}</h2>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 tabular-nums">
-                                    ${doneCount} / ${totalCount}
-                                </span>
+                                ${!isEditing ? `
+                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 tabular-nums">
+                                        ${doneCount} / ${totalCount}
+                                    </span>
+                                ` : `
+                                    <button type="button" onclick="event.stopPropagation(); renameSection('${section.divider.id}')" title="編輯分類名稱" class="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 hover:bg-blue-500/80 text-white transition-all active:scale-95">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" onclick="event.stopPropagation(); deleteSection('${section.divider.id}')" title="刪除分類" class="w-7 h-7 flex items-center justify-center rounded-lg bg-black/40 hover:bg-red-500/80 text-white transition-all active:scale-95">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                `}
                             </div>
                         </div>
                         
@@ -367,6 +380,15 @@
             }).join('');
 
             container.innerHTML = htmlString;
+
+            if (isEditing) {
+                const addSectionBtn = document.createElement('button');
+                addSectionBtn.type = 'button';
+                addSectionBtn.className = 'w-full mt-4 border-2 border-dashed border-green-500/50 text-green-400 hover:border-green-500/80 hover:text-green-300 bg-green-500/5 hover:bg-green-500/10 rounded-xl py-3 font-semibold transition-all text-sm';
+                addSectionBtn.innerHTML = '新增分類';
+                addSectionBtn.onclick = () => addSection();
+                container.appendChild(addSectionBtn);
+            }
 
             // 動態更新 Header 的編輯按鈕狀態與圖示
             const editBtn = document.getElementById('edit-mode-btn');
@@ -518,6 +540,60 @@
                 currentItems.splice(dividerIndex + 1, 0, newItem);
                 renderList();
             }
+        };
+
+        window.addSection = function () {
+            const sectionName = window.prompt("請輸入新分類的名稱：");
+            if (!sectionName || sectionName.trim() === "") return;
+
+            const currentItems = getCurrentItems();
+            
+            const newDividerId = "d_" + Date.now();
+            const newDivider = {
+                id: newDividerId,
+                name: sectionName.trim(),
+                isDivider: true
+            };
+
+            currentItems.push(newDivider);
+            renderList();
+        };
+
+        window.renameSection = function (sectionId) {
+            const currentItems = getCurrentItems();
+            const targetSection = currentItems.find(item => item.id === sectionId && item.isDivider);
+            if (!targetSection) return;
+
+            const newName = window.prompt("請輸入新的分類名稱：", targetSection.name);
+            if (newName && newName.trim() !== "") {
+                targetSection.name = newName.trim();
+                renderList();
+            }
+        };
+
+        window.deleteSection = function (sectionId) {
+            const currentItems = getCurrentItems();
+            const dividerIndex = currentItems.findIndex(item => item.id === sectionId && item.isDivider);
+            if (dividerIndex === -1) return;
+
+            const section = currentItems[dividerIndex];
+            
+            let itemCount = 0;
+            for (let i = dividerIndex + 1; i < currentItems.length; i++) {
+                if (currentItems[i].isDivider) break;
+                itemCount++;
+            }
+
+            const confirmed = window.confirm(
+                itemCount > 0 
+                    ? `刪除分類【${section.name}】會同時刪除其中 ${itemCount} 個項目。確定要刪除嗎？`
+                    : `確定要刪除空分類【${section.name}】嗎？`
+            );
+            if (!confirmed) return;
+
+            // 刪除該分類及其所有項目
+            currentItems.splice(dividerIndex, itemCount + 1);
+            renderList();
         };
 
         window.renameCurrentTemplate = function () {
