@@ -95,6 +95,30 @@
         .checklist-item {
             will-change: transform;
         }
+
+        /* ── drag and drop styles ── */
+        .draggable-item {
+            cursor: grab;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .checklist-item.drag-over-top {
+            border-top: 3px solid #3b82f6;
+            padding-top: calc(1rem - 3px);
+        }
+
+        .checklist-item.drag-over-bottom {
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: calc(1rem - 3px);
+        }
+
+        .checklist-item.dragging {
+            opacity: 0.5;
+            background-color: rgba(37, 99, 235, 0.2);
+        }
     </style>
 </head>
 
@@ -273,8 +297,9 @@
                 const isAllDone = totalCount > 0 && doneCount === totalCount;
 
                 const itemsHtml = section.elements.map(item => `
-                    <div data-item-id="${item.id}" class="checklist-item flex justify-between items-center bg-[#18181c] p-4 rounded-xl border border-white/5 hover:bg-[#202025] transition active:scale-[0.98] ${isEditing ? 'cursor-default' : 'cursor-pointer'} selection:bg-transparent"
-                        ${isEditing ? '' : `onclick="toggleItem('${item.id}')"`}>
+                    <div data-item-id="${item.id}" data-section-id="${section.divider.id}" class="checklist-item flex justify-between items-center bg-[#18181c] p-4 rounded-xl border border-white/5 hover:bg-[#202025] transition active:scale-[0.98] ${isEditing ? 'draggable-item cursor-grab' : 'cursor-pointer'} selection:bg-transparent"
+                        draggable="${isEditing ? 'true' : 'false'}"
+                        ${isEditing ? `ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)"` : `onclick="toggleItem('${item.id}')"`}>
                         <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
                             ${item.name}
                         </span>
@@ -301,6 +326,7 @@
                                 >
                                     修改名稱
                                 </button>
+                                <span class="text-gray-500 text-xs ml-1 cursor-grab" title="拖拽排序">☰</span>
                             </div>
                         </div>
                     </div>
@@ -547,6 +573,79 @@
             renderTemplateSelector();
             renderList();
         };
+
+        /* ── Drag and Drop Logic ── */
+        let draggedItemId = null;
+        let draggedSectionId = null;
+
+        window.handleDragStart = function (e) {
+            if (!isEditing) return;
+            draggedItemId = e.currentTarget.dataset.itemId;
+            draggedSectionId = e.currentTarget.dataset.sectionId;
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        };
+
+        window.handleDragEnd = function (e) {
+            document.querySelectorAll('.draggable-item').forEach(el => {
+                el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom');
+            });
+            draggedItemId = null;
+            draggedSectionId = null;
+        };
+
+        window.handleDragOver = function (e) {
+            if (!isEditing || !draggedItemId) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const target = e.currentTarget;
+            if (target.dataset.itemId === draggedItemId) return;
+            
+            const rect = target.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            
+            target.classList.remove('drag-over-top', 'drag-over-bottom');
+            if (e.clientY < midpoint) {
+                target.classList.add('drag-over-top');
+            } else {
+                target.classList.add('drag-over-bottom');
+            }
+        };
+
+        window.handleDrop = function (e) {
+            if (!isEditing || !draggedItemId) return;
+            e.preventDefault();
+            
+            const targetItemId = e.currentTarget.dataset.itemId;
+            const targetSectionId = e.currentTarget.dataset.sectionId;
+            
+            if (targetItemId === draggedItemId) return;
+            
+            const currentItems = getCurrentItems();
+            const draggedIndex = currentItems.findIndex(item => item.id === draggedItemId);
+            const targetIndex = currentItems.findIndex(item => item.id === targetItemId);
+            
+            if (draggedIndex === -1 || targetIndex === -1) return;
+            
+            const rect = e.currentTarget.getBoundingClientRect();
+            const midpoint = rect.top + rect.height / 2;
+            const isAbove = e.clientY < midpoint;
+            const [draggedItem] = currentItems.splice(draggedIndex, 1);
+            let newTargetIndex = currentItems.findIndex(item => item.id === targetItemId);
+            
+            if (isAbove) {
+                currentItems.splice(newTargetIndex, 0, draggedItem);
+            } else {
+                currentItems.splice(newTargetIndex + 1, 0, draggedItem);
+            }
+            
+            renderList();
+        };
+
+        document.addEventListener('dragover', function (e) {
+            e.preventDefault();
+        });
 
         renderTemplateSelector();
         renderList();
