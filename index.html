@@ -192,7 +192,6 @@
                 </button>
             </div>
 
-            <!-- 底部提示小字 -->
             <div class="flex items-center gap-1.5 text-gray-500 mt-4 text-xs font-medium opacity-80">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-gray-500" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -202,6 +201,33 @@
                 <span>勾選後的物品會自動沉到底部</span>
             </div>
         </header>
+
+        <div id="stats-view" class="px-4 pt-4 pb-2">
+            <div class="bg-[#121215] border border-white/5 rounded-2xl p-4 transition-all">
+                <div class="mb-4">
+                    <div class="h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-blue-400 w-0 transition-all duration-500 ease-out rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
+                        <div class="text-xs text-gray-400 font-medium mb-1 tracking-wide">已完成</div>
+                        <div id="completed-count" class="text-2xl font-bold text-blue-400 tabular-nums">0</div>
+                    </div>
+
+                    <div class="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
+                        <div class="text-xs text-gray-400 font-medium mb-1 tracking-wide">全部項目</div>
+                        <div id="total-count" class="text-2xl font-bold text-gray-300 tabular-nums">0</div>
+                    </div>
+
+                    <div class="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
+                        <div class="text-xs text-gray-400 font-medium mb-1 tracking-wide">完成度</div>
+                        <div id="percentage" class="text-2xl font-bold text-green-400 tabular-nums">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div id="checklist-container" class="p-4 space-y-3 max-h-[70vh] overflow-y-auto"></div>
     </main>
@@ -265,6 +291,9 @@
             container.innerHTML = '';
 
             const currentItems = getCurrentItems();
+            
+            updateStatsView(currentItems);
+
             const partitioned = [];
             let currentSection = null;
 
@@ -623,6 +652,22 @@
 
             renderList();
         };
+
+        function updateStatsView(items) {
+            const nonDividerItems = items.filter(item => !item.isDivider);
+            const totalCount = nonDividerItems.length;
+            const completedCount = nonDividerItems.filter(item => item.isDone).length;
+            const percentage = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+
+            // 更新數字
+            document.getElementById('completed-count').textContent = completedCount;
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('percentage').textContent = percentage + '%';
+
+            // 更新進度條
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = (totalCount === 0 ? 0 : percentage) + '%';
+        }
 
         window.renameCurrentTemplate = function () {
             const currentTemplate = templates[currentTemplateId];
