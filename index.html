@@ -5,12 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>旅遊打包檢查器</title>
-    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
-    <!-- Favicon for browser tabs -->
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="shortcut icon" href="icon-192.png">
-    <!-- Apple PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="旅遊打包檢查器">
@@ -92,6 +89,11 @@
 
         .action-small-btn:active {
             transform: translateY(0);
+        }
+
+        /* ── checklist item: FLIP animation base ── */
+        .checklist-item {
+            will-change: transform;
         }
     </style>
 </head>
@@ -267,7 +269,7 @@
                 const isAllDone = totalCount > 0 && doneCount === totalCount;
 
                 const itemsHtml = section.elements.map(item => `
-                    <div class="flex justify-between items-center bg-[#18181c] p-4 rounded-xl border border-white/5 hover:bg-[#202025] transition active:scale-[0.98] ${isEditing ? 'cursor-default' : 'cursor-pointer'} selection:bg-transparent"
+                    <div data-item-id="${item.id}" class="checklist-item flex justify-between items-center bg-[#18181c] p-4 rounded-xl border border-white/5 hover:bg-[#202025] transition active:scale-[0.98] ${isEditing ? 'cursor-default' : 'cursor-pointer'} selection:bg-transparent"
                         ${isEditing ? '' : `onclick="toggleItem('${item.id}')"`}>
                         <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
                             ${item.name}
@@ -364,11 +366,78 @@
             }
         };
 
+        const _pendingToggle = new Set();
+
         window.toggleItem = function (id) {
+            if (_pendingToggle.has(id)) return;
+
             const currentItems = getCurrentItems();
             const targetItem = currentItems.find(item => String(item.id) === String(id));
-            if (targetItem && !targetItem.isDivider) {
-                targetItem.isDone = !targetItem.isDone;
+            if (!targetItem || targetItem.isDivider) return;
+
+            const willBeDone = !targetItem.isDone;
+
+            if (willBeDone) {
+                _pendingToggle.add(id);
+
+                // FLIP: First ── Snapshot positions of every item before re-render
+                const firstRects = new Map();
+                document.querySelectorAll('[data-item-id]').forEach(el => {
+                    firstRects.set(el.dataset.itemId, el.getBoundingClientRect());
+                });
+
+                // Commit state + re-render (DOM is now in final state)
+                targetItem.isDone = true;
+                renderList();
+
+                // FLIP: Last ── Snapshot positions after re-render
+                const newEls = document.querySelectorAll('[data-item-id]');
+                const lastRects = new Map();
+                newEls.forEach(el => {
+                    lastRects.set(el.dataset.itemId, el.getBoundingClientRect());
+                });
+
+                // FLIP: Invert + Play
+                newEls.forEach(el => {
+                    const itemId = el.dataset.itemId;
+                    const first = firstRects.get(itemId);
+                    const last = lastRects.get(itemId);
+                    if (!first || !last) return;
+
+                    const deltaY = first.top - last.top;
+                    const isCheckedItem = itemId === id;
+
+                    // Skip items that didn't move (and aren't the checked item)
+                    if (Math.abs(deltaY) < 1 && !isCheckedItem) return;
+
+                    // Invert: teleport the element back to its old visual position
+                    el.style.transition = 'none';
+                    el.style.transform = `translateY(${deltaY}px)`;
+                    if (isCheckedItem) el.style.opacity = '1';
+
+                    // Force a reflow so the browser registers the starting state
+                    el.getBoundingClientRect();
+
+                    // Play: animate to the natural (new) position
+                    const dur = isCheckedItem ? '0.45s' : '0.38s';
+                    el.style.transition = `transform ${dur} cubic-bezier(0.4, 0, 0.2, 1)`
+                                        + (isCheckedItem ? ', opacity 0.45s ease' : '');
+                    el.style.transform  = '';
+                    if (isCheckedItem) el.style.opacity = ''; // let Tailwind opacity-50 take over
+
+                    // Clean up inline styles after animation
+                    el.addEventListener('transitionend', () => {
+                        el.style.transition = '';
+                        el.style.transform  = '';
+                        el.style.opacity    = '';
+                    }, { once: true });
+                });
+
+                _pendingToggle.delete(id);
+
+            } else {
+                // Unchecking: instant re-render
+                targetItem.isDone = false;
                 renderList();
             }
         };
