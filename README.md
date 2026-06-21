@@ -1,4 +1,5 @@
 # PackMom 旅遊打包檢查器
+<img width="463" height="883" alt="image" src="https://github.com/user-attachments/assets/6e9e7150-08ce-49b6-a751-fed655ea63d0" />
 
 一個為我媽設計的旅行打包清單 PWA，純靜態網頁，不需後端、不需帳號，打開就能用。
 
