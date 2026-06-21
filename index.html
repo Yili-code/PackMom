@@ -388,6 +388,13 @@
                 addSectionBtn.innerHTML = '新增分類';
                 addSectionBtn.onclick = () => addSection();
                 container.appendChild(addSectionBtn);
+            } else {
+                const resetBtn = document.createElement('button');
+                resetBtn.type = 'button';
+                resetBtn.className = 'w-full mt-4 border-2 border-dashed border-amber-500/50 text-amber-400 hover:border-amber-500/80 hover:text-amber-300 bg-amber-500/5 hover:bg-amber-500/10 rounded-xl py-3 font-semibold transition-all text-sm';
+                resetBtn.innerHTML = '清空所有勾選';
+                resetBtn.onclick = () => resetAllChecks();
+                container.appendChild(resetBtn);
             }
 
             // 動態更新 Header 的編輯按鈕狀態與圖示
@@ -593,6 +600,27 @@
 
             // 刪除該分類及其所有項目
             currentItems.splice(dividerIndex, itemCount + 1);
+            renderList();
+        };
+
+        window.resetAllChecks = function () {
+            const currentItems = getCurrentItems();
+            const checkedCount = currentItems.filter(item => !item.isDivider && item.isDone).length;
+            
+            if (checkedCount === 0) {
+                alert("沒有已勾選的項目。");
+                return;
+            }
+
+            const confirmed = window.confirm(`確定要清空所有 ${checkedCount} 個已勾選的項目嗎？`);
+            if (!confirmed) return;
+
+            currentItems.forEach(item => {
+                if (!item.isDivider && item.isDone) {
+                    item.isDone = false;
+                }
+            });
+
             renderList();
         };
 
