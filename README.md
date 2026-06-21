@@ -20,11 +20,11 @@
 
 - **複製模板**：不用每次從頭建，直接複製現有模板來改，複製時所有勾選狀態會自動重置
 
-- **編輯模式**：點右上角「編輯清單」可新增、刪除、修改項目名稱，完成後再點一次關閉
+- **編輯模式**：點「編輯清單」可新增、刪除、修改項目名稱，完成後再點一次關閉
 
 - **離線可用（PWA）**：第一次載入後即使沒網路也能正常使用，可安裝到手機主畫面
 
-- **本地儲存**：所有資料存在瀏覽器的 `localStorage`，清空快取才會消失，不會上傳到任何伺服器
+- **本地儲存**：所有資料存在瀏覽器的 localStorage，清空快取才會消失，不會上傳到任何伺服器
 
 ---
 
@@ -34,7 +34,7 @@
 |------|------|
 | 架構 | 純 HTML + Vanilla JS（無框架） |
 | 樣式 | Tailwind CSS（CDN） |
-| 動畫 | FLIP 技術（First–Last–Invert–Play），勾選時滑動位移自然流暢 |
+| 動畫 | FLIP 技術，勾選時滑動位移自然流暢 |
 | 離線 | Service Worker，Network First 策略 |
 | 儲存 | localStorage |
 | 安裝 | Web App Manifest，支援 Android / iOS 加入主畫面 |
@@ -43,9 +43,9 @@
 
 ## 快速開始
 
-不需要 Node、不需要打包工具，直接用瀏覽器打開 `index.html` 就能跑。
+不需要 Node、不需要打包工具，直接用瀏覽器打開 index.html 就能跑。
 
-```
+```bash
 git clone https://github.com/你的帳號/PackMom.git
 cd PackMom
 # 用任意靜態伺服器起服務（Service Worker 需要 http/https，不能直接用 file://）
@@ -83,7 +83,7 @@ PackMom/
 
 ## 已知限制
 
-- 資料存在 `localStorage`，換瀏覽器或清除快取後需重新設定
+- 資料存在 localStorage，換瀏覽器或清除快取後需重新設定
 - 目前沒有匯出/匯入功能，多裝置之間的同步要手動複製
 - 手機版 Safari 加入主畫面後，Service Worker 的快取行為與 Android 略有不同
 
