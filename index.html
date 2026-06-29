@@ -134,7 +134,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
-                    <h1 class="text-base font-bold tracking-wider text-gray-100">旅遊打包檢查器</h1>
+                    <h1 class="text-base font-bold tracking-wider text-gray-100">打包檢查</h1>
                 </div>
 
                 <button type="button" onclick="toggleEditMode()" id="edit-mode-btn"
@@ -145,7 +145,7 @@
                             d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span>編輯清單</span>
+                    <span>編輯</span>
                 </button>
             </div>
 
@@ -217,7 +217,7 @@
                     </div>
 
                     <div class="bg-white/5 rounded-lg p-3 border border-white/10 text-center">
-                        <div class="text-xs text-gray-400 font-medium mb-1 tracking-wide">全部項目</div>
+                        <div class="text-xs text-gray-400 font-medium mb-1 tracking-wide">總數量</div>
                         <div id="total-count" class="text-2xl font-bold text-gray-300 tabular-nums">0</div>
                     </div>
 
@@ -362,7 +362,7 @@
                     <div data-item-id="${item.id}" data-section-id="${section.divider.id}" class="checklist-item flex justify-between items-center bg-[#18181c] p-4 rounded-xl border border-white/5 hover:bg-[#202025] transition active:scale-[0.98] ${isEditing ? 'draggable-item cursor-grab' : 'cursor-pointer'} selection:bg-transparent"
                         draggable="${isEditing ? 'true' : 'false'}"
                         ${isEditing ? `ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)"` : `onclick="toggleItem('${item.id}')"`}>
-                        <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'line-through text-gray-500 opacity-50' : 'text-gray-100'}">
+                        <span class="text-lg font-medium tracking-wide transition-all duration-300 ${item.isDone ? 'text-gray-100' : 'text-gray-100'}">
                             ${item.name}
                         </span>
                         <div class="flex items-center gap-2">
