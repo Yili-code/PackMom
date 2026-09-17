@@ -44,16 +44,17 @@
 
 ## 快速開始
 
-不需要 Node、不需要打包工具，直接用瀏覽器打開 index.html 就能跑。
+不需要建置步驟。為了讓 Service Worker 與離線功能正常運作，請透過本機 HTTP server 開啟，而不是直接使用 `file://`。
 
 ```bash
-git clone https://github.com/你的帳號/PackMom.git
+git clone https://github.com/Yili-code/PackMom.git
 cd PackMom
-# 用任意靜態伺服器起服務（Service Worker 需要 http/https，不能直接用 file://）
+# 選擇一種本機靜態伺服器
 npx serve .
+# 或：python -m http.server 8000
 ```
 
-然後開 `http://localhost:3000` 就好了。
+`npx serve .` 會在終端顯示實際網址；使用 Python 時開啟 `http://localhost:8000`。
 
 ---
 
