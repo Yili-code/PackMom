@@ -30,15 +30,19 @@ self.addEventListener('activate', e => {
 
 // Fetch Event (Network First Strategy for dynamic updates)
 self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+
   e.respondWith(
     fetch(e.request)
         .then(res => {
             const resClone = res.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(e.request, resClone));
+            e.waitUntil(
+              caches.open(CACHE_NAME).then(cache => cache.put(e.request, resClone))
+            );
             return res;
         })
-        .catch(() => {
-            caches.match(e.request)
+        .catch(async () => {
+            return (await caches.match(e.request)) || caches.match('index.html');
         })
   );
 });
