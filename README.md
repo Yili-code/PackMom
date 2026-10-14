@@ -1,7 +1,12 @@
-# PackMom 旅遊打包檢查器
-<img width="463" height="883" alt="image" src="https://github.com/user-attachments/assets/6e9e7150-08ce-49b6-a751-fed655ea63d0" />
+# PackMom — Travel Packing Checklist / 旅遊打包檢查器
 
-一個為我媽設計的旅行打包清單 PWA，純靜態網頁，不需後端、不需帳號，打開就能用。
+**A travel packing checklist PWA with reusable templates, offline support after first load, and local browser storage. No account or backend required.**
+
+為家人設計的旅行打包清單：建立不同旅程的模板、勾選已打包物品，並在手機主畫面開啟使用。資料保存在目前瀏覽器。
+
+[功能](#功能) · [快速開始](#快速開始) · [已知限制](#已知限制)
+
+<img width="463" height="883" alt="PackMom mobile travel packing checklist with categorized items" src="https://github.com/user-attachments/assets/6e9e7150-08ce-49b6-a751-fed655ea63d0" />
 
 ---
 
